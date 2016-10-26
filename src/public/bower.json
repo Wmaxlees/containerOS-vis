@@ -1,0 +1,26 @@
+{
+  "name": "Shell Shock",
+  "homepage": "https://github.com/Wmaxlees/containerOS-vis",
+  "authors": [
+    "(Rob Fitzgerald <robert.fitzgerald@ucdenver.edu>)",
+    "(Matthew Kalan <matthew.kalan@ucdenver.edu>)",
+    "(Max Lees <william.lees@ucdenver.edu>)",
+    "(Francisco Perez <francisco.perez@ucdenver.edu>)",
+    "(Matt Sheidler <matt.scheidler@ucdenver.edu>)"
+  ],
+  "description": "Docker Container Statistic Visualizer",
+  "main": "html/index.html",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone": "^1.3.3",
+    "jquery": "^3.1.1"
+  }
+}
