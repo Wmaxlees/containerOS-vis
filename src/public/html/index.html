@@ -8,15 +8,16 @@
   <p>Placeholder Client Site</p>
   <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function(event) { 
-      var DataModel = Backbone.Model.extend({
-        defaults: {
-          cpuData: null,
-          memData: null
-        }
-      })
+      // @TODO: define data model if we want
+      // var DataModel = Backbone.Model.extend({
+      //   defaults: {
+      //     cpuData: null,
+      //     memData: null
+      //   }
+      // })
       var DataCollection = Backbone.Collection.extend({
         url: '/query',
-        model: DataModel
+        // model: DataModel
       })
       var data = new DataCollection()
       data.fetch().then(function() {
