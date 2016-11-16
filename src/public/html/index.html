@@ -6,31 +6,9 @@
 </head>
 <body>
   <p>Placeholder Client Site</p>
-  <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(event) { 
-      // @TODO: define data model if we want
-      // var DataModel = Backbone.Model.extend({
-      //   defaults: {
-      //     cpuData: null,
-      //     memData: null
-      //   }
-      // })
-      var DataCollection = Backbone.Collection.extend({
-        url: '/query',
-        // model: DataModel
-      })
-      var data = new DataCollection()
-      data.fetch().then(function() {
-        console.log('query returned with the following elements:')
-        query.foreach(function (element) {
-          console.log(element)
-        })
-      })
-    });
-
-  </script>
   <script src="/bower_components/underscore/underscore-min.js"></script>
   <script src="/bower_components/jquery/dist/jquery.min.js"></script>
   <script src="/bower_components/backbone/backbone-min.js"></script>
+  <script src="/js/client.js"></script>
 </body>
 </html>
