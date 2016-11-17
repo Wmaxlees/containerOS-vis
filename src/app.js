@@ -31,7 +31,9 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
+app.use('/', (req,res) => {
+    res.sendFile(__dirname + '/public/html/index.html');
+});
 app.use('/query', query);
 app.use('/run', run);
 
