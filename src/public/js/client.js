@@ -1,16 +1,34 @@
 'use strict';
 {
-  var activePolling = false;
+  /**
+   * User-declared maximum number of containers which can be created
+   * @type {Number}
+   */
+  const MAX_CONTAINERS = 4; 
+  
+  /**
+   * User-declared cycle speed of the polling operation
+   * @type {Number}
+   */
+  const LOOP_MS = 2000;
 
-  const MAX_CONTAINERS = 2; 
+  /**
+   * monitors the creation and mapping of containers to visualizer ids
+   * @type {Object}
+   * @example
+   * containers.newId('myContainerId') // creates a mapping of myContainerId to an integer
+   * containers.getId('myContainerId') // returns the mapped integer
+   * containers.deleteId('myContainerId')
+   * containers.hasSpaceForNew() // true if we have not hit MAX_CONTAINERS
+   */
   var containers = {
     map: {},
     hasSpaceForNew: () => { return Object.keys(containers.map).length < MAX_CONTAINERS; },
     newId: (id) => { 
-      var possibleIds = [];
-      for (var i = 0; i < MAX_CONTAINERS; ++i) 
+      let possibleIds = [];
+      for (let i = 0; i < MAX_CONTAINERS; ++i) 
         possibleIds.push(i);
-      var unusedIds = _.difference(possibleIds, _.values(containers.map));
+      let unusedIds = _.difference(possibleIds, _.values(containers.map));
       if (unusedIds.length > 0) {
         containers.map[id] = unusedIds[0];
         return true;
@@ -28,80 +46,109 @@
     },
     getId: (id) => {
       return containers.map.hasOwnProperty(id) ? containers.map[id] : false; 
+    },
+    generateChartData: (prefixValue) => {
+      let output = [];
+      if (prefixValue)
+        output.push(prefixValue)
+      for (let i = 0; i < MAX_CONTAINERS; ++i)
+        output.push(null)
+      return output;
     }
   };
 
+  /**
+   * Defines the Collection for Container GET Queries
+   * @type {Backbone.Collection}
+   */
+  var DataCollection = Backbone.Collection.extend({
+    url: '/query',
+  })
+  var data = new DataCollection()
+
+  /**
+   * Initializes the client's list of currently active Docker containers
+   */
+  function loadInitialContainerIds() {
+    data.fetch({reset: true})
+      .then((d,res,opt) => {
+        if (Array.isArray(d)) {
+          d.forEach((e,i,a) => {
+            containers.newId(e.id)  
+          })
+          // console.log(containers.map) // show initial container id mapping
+        }
+      })
+      .catch((err) => {
+        console.log('unable to find initial set of containers')
+        console.log(err)
+      })
+  }
+
+  /**
+   * flag to identify if the polling loop should continue
+   * @type {Boolean}
+   */
+  var activePolling = false;
+
+  /**
+   * Polls the Docker container data from the server
+   */
+  function pollNewData() {
+    data.fetch({reset: true})
+      .then((d,res,opt) => {
+        if (activePolling && Array.isArray(d)) {
+          var cpuData = containers.generateChartData(Date.now())
+            , memData = containers.generateChartData();
+
+          d.forEach((e, i, a) => {
+            let chartId = containers.getId(e.id) 
+            cpuData[chartId+1] = Number.parseFloat(e.cpu)
+            memData[chartId] = Number.parseFloat(e.memory)
+          })
+          Charts.updateCPU(cpuData)
+          Charts.updateMem(memData)
+        }
+      })
+      .catch((err) => {
+        console.log('fetch failure.')
+        console.log(err)
+      })
+  }
+
+  /**
+   * Runs a loop of polling Docker data until the user flips the switch off
+   */
+  function loopPolling() {
+    setTimeout(function () {
+      if (activePolling) {
+        // console.log('loopPolling() running')
+        pollNewData();
+        loopPolling();
+      }
+    }, LOOP_MS);
+  }
+ 
+
   $( document ).ready(function() {
       
-      $('#toggle_event_editing button').click(function(){
-        if($(this).hasClass('locked_active') || $(this).hasClass('unlocked_inactive')){
-          /* code to do when unlocking */
-          // $('#switch_status').html('Switched on.');
-          activePolling = true;
-          pollNewData();
-        }else{
-          /* code to do when locking */
-          // $('#switch_status').html('Switched off.');
-          activePolling = false;
-        }
-  
-        /* reverse locking status */
-        $('#toggle_event_editing button').eq(0).toggleClass('locked_inactive locked_active btn-default btn-info');
-        $('#toggle_event_editing button').eq(1).toggleClass('unlocked_inactive unlocked_active btn-info btn-default');
-      });
+    loadInitialContainerIds();
 
-      console.log('client.js')
-      // @TODO: define data model if we want
-      // var DataModel = Backbone.Model.extend({
-      //   defaults: {
-      //     id: null,
-      //     memory: null,
-      //     cpu: null
-      //   }
-      // })
-      var DataCollection = Backbone.Collection.extend({
-        url: '/query',
-        // model: DataModel
-      })
-      var data = new DataCollection()
-      
-
-      function pollNewData() {
-        data.fetch(fetchSuccess,fetchFailure,{reset: true})
-        
-        function fetchSuccess (d, res, opt) {
-          console.log('fetch success')
-          if (activePolling && Array.isArray(d)) {
-            var cpuData = [Date.now()] 
-              , memData = [];
-            d.forEach((e, i, a) => {
-              // parse data 
-              cpuData.push(e.cpu)
-              memData.push(e.mem)
-            })
-            Charts.updateCPU(cpuData)
-            Charts.updateMem(memData)
-          } else {
-            var blah = 0;
-            console.log(`at time ${blah}, received response that wasn't an array`)
-          }
-        }
-
-        function fetchFailure (d, res, opt) {
-          console.log('fetch failure')
-        }
+    $('#polling button').click(function(){
+      if($(this).hasClass('locked_active') || $(this).hasClass('unlocked_inactive')){
+        /* code to do when unlocking */
+        $('#polling_status').html('Polling every ' + LOOP_MS / 1000 + ' seconds.');
+        activePolling = true;
+        loopPolling();
+      }else{
+        /* code to do when locking */
+        $('#polling_status').html('Polling is inactive.');
+        activePolling = false;
       }
 
-      function loopPolling() {
-        setTimeout(function () {
-          console.log('loopPolling')
-          pollNewData();
-          if (activePolling)
-            loopPolling();
-        }, 1000);
-      }
-
-      // manual testing
-      
+      /* reverse locking status */
+      $('#polling button').eq(0).toggleClass('locked_inactive locked_active btn-default btn-info');
+      $('#polling button').eq(1).toggleClass('unlocked_inactive unlocked_active btn-info btn-default');
+    });      
   });  
 }
