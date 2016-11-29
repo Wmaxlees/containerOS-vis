@@ -4,26 +4,24 @@
    * User-declared maximum number of containers which can be created
    * @type {Number}
    */
-  const MAX_CONTAINERS = 4; 
+  const MAX_CONTAINERS = 7; 
   
   /**
    * User-declared cycle speed of the polling operation
    * @type {Number}
    */
-  const LOOP_MS = 2000;
+  const LOOP_MS = 3000;
 
   /**
    * monitors the creation and mapping of containers to visualizer ids
    * @type {Object}
    * @example
-   * containers.newId('myContainerId') // creates a mapping of myContainerId to an integer
-   * containers.getId('myContainerId') // returns the mapped integer
+   * containers.newId('myContainerId') // creates a mapping of myContainerId to an integer, or false
+   * containers.getId('myContainerId') // returns the mapped integer, or false
    * containers.deleteId('myContainerId')
-   * containers.hasSpaceForNew() // true if we have not hit MAX_CONTAINERS
    */
   var containers = {
     map: {},
-    hasSpaceForNew: () => { return Object.keys(containers.map).length < MAX_CONTAINERS; },
     newId: (id) => { 
       let possibleIds = [];
       for (let i = 0; i < MAX_CONTAINERS; ++i) 
@@ -31,7 +29,7 @@
       let unusedIds = _.difference(possibleIds, _.values(containers.map));
       if (unusedIds.length > 0) {
         containers.map[id] = unusedIds[0];
-        return true;
+        return containers.map[id];
       } else {
         return false;
       }
@@ -69,14 +67,15 @@
   /**
    * Initializes the client's list of currently active Docker containers
    */
-  function loadInitialContainerIds() {
+  function loadInitialContainerIds(callback) {
     data.fetch({reset: true})
       .then((d,res,opt) => {
         if (Array.isArray(d)) {
           d.forEach((e,i,a) => {
             containers.newId(e.id)  
           })
-          // console.log(containers.map) // show initial container id mapping
+          console.log(containers.map) // show initial container id mapping
+          callback()
         }
       })
       .catch((err) => {
@@ -100,18 +99,22 @@
         if (activePolling && Array.isArray(d)) {
           var cpuData = containers.generateChartData(Date.now())
             , memData = containers.generateChartData();
-
           d.forEach((e, i, a) => {
-            let chartId = containers.getId(e.id) 
-            cpuData[chartId+1] = Number.parseFloat(e.cpu)
-            memData[chartId] = Number.parseFloat(e.memory)
-          })
+            var chartId = containers.getId(e.id)
+            if (chartId === false) {
+              chartId = containers.newId(e.id)
+            }
+            if (chartId !== false) {
+              cpuData[chartId+1] = Number.parseFloat(e.cpu)
+              memData[chartId] = Number.parseFloat(e.memory)
+            }
+          }) 
           Charts.updateCPU(cpuData)
           Charts.updateMem(memData)
-        }
+        } 
       })
       .catch((err) => {
-        console.log('fetch failure.')
+        console.log('aww, shell shock.')
         console.log(err)
       })
   }
@@ -123,6 +126,7 @@
     setTimeout(function () {
       if (activePolling) {
         // console.log('loopPolling() running')
+        console.log(containers.map)
         pollNewData();
         loopPolling();
       }
@@ -130,25 +134,23 @@
   }
  
 
-  $( document ).ready(function() {
-      
-    loadInitialContainerIds();
-
-    $('#polling button').click(function(){
-      if($(this).hasClass('locked_active') || $(this).hasClass('unlocked_inactive')){
-        /* code to do when unlocking */
-        $('#polling_status').html('Polling every ' + LOOP_MS / 1000 + ' seconds.');
-        activePolling = true;
-        loopPolling();
-      }else{
-        /* code to do when locking */
-        $('#polling_status').html('Polling is inactive.');
-        activePolling = false;
-      }
-
-      /* reverse locking status */
-      $('#polling button').eq(0).toggleClass('locked_inactive locked_active btn-default btn-info');
-      $('#polling button').eq(1).toggleClass('unlocked_inactive unlocked_active btn-info btn-default');
-    });      
+  $(document).ready(function() {   
+    loadInitialContainerIds(() => {
+      $('#polling button').click(function(){
+        if($(this).hasClass('locked_active') || $(this).hasClass('unlocked_inactive')){
+          /* code to do when unlocking */
+          $('#polling_status').html('Polling every ' + LOOP_MS / 1000 + ' seconds.');
+          activePolling = true;
+          loopPolling();
+        }else{
+          /* code to do when locking */
+          $('#polling_status').html('Polling is inactive.');
+          activePolling = false;
+        }
+        /* reverse locking status */
+        $('#polling button').eq(0).toggleClass('locked_inactive locked_active btn-default btn-info');
+        $('#polling button').eq(1).toggleClass('unlocked_inactive unlocked_active btn-info btn-default');
+      });  
+    });    
   });  
 }
