@@ -23,7 +23,7 @@ function initCharts() {
         },
         // defaultSeriesType: 'spline',
         // events: {
-        // 	load: 
+        // 	load: getStuff
         // }
       },
       title: {
@@ -101,14 +101,11 @@ function initCharts() {
 }
 
 function updateCPU (arr) {
-  console.log('updateCPU called with ' + arr)
   var time = (new Date()).getTime()
   var points = arr.slice(1)
   points.forEach((cpuData,i) => {
-    console.log('value ' + i + ': [' + time + ', ' + cpuData + ']')
-    chart1.series[i+1].addPoint([time,cpuData],true,true)
-  })  
-  console.log(chart1.series)
+    chart1.series[i+1].addPoint([time,cpuData],true,false)
+  })
 }
 
 function updateMem (arr /* whatever you need here too */) {
