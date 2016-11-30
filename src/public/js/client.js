@@ -59,10 +59,14 @@
    * Defines the Collection for Container GET Queries
    * @type {Backbone.Collection}
    */
-  var DataCollection = Backbone.Collection.extend({
+  var ContainerData = Backbone.Collection.extend({
     url: '/query',
   })
-  var data = new DataCollection()
+  var data = new ContainerData()
+  var CreateContainerEndpoint = = Backbone.Collection.extend({
+    url: '/run?script=1'
+  }) 
+  var createContainer = new CreateContainerEndpoint()
 
   /**
    * Initializes the client's list of currently active Docker containers
@@ -133,6 +137,15 @@
     }, LOOP_MS);
   }
  
+  function createNewContainer(callback) {
+    createContainer.fetch()
+      .then(() => {
+        callback(null, 'good')
+      })
+      .catch((err) => {
+        callback(err)
+      })
+  }
 
   $(document).ready(function() {   
     loadInitialContainerIds(() => {
