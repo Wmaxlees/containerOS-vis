@@ -1,26 +1,42 @@
 <!-- Client -->
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Shell Shock</title>
-</head>
-<body>
-  
-  <p>Shell Shock : Ultimate Docker Container Polling Service</p>
-  <div class="btn-group" id="polling">
-    <button type="button" class="btn btn-info locked_active">OFF</button>
-    <button type="button" class="btn btn-default unlocked_inactive">ON</button>
-  </div>
-  <div class="alert alert-info" id="polling_status">Polling is inactive.</div>  
-  
-  <!-- @TODO: make the page nicer -->
-  
-  <!--   Put appropriate Highcharts tags on the page -->
-
-  <script src="/bower_components/underscore/underscore-min.js"></script>
-  <script src="/bower_components/jquery/dist/jquery.min.js"></script>
-  <script src="/bower_components/backbone/backbone-min.js"></script>
-  <script src="/js/charts.js"></script>
-  <script src="/js/client.js"></script>
-</body>
+  <head>
+    <title>Shell Shock</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <div class="masthead">
+          <img src="img/banner.png"/>
+        </div>
+        <p class="lead"><font color="green">TMNT</font> Group Project || Container Polling Service</p>
+      </div><!--page-header-->
+      <div class="row" style="height: 450px;">
+        <div class="col-lg-4 col-md-4"><img style="height: 350px;" src="img/donnie.png"/></div>
+        <div class="col-lg-8 col-md-8" id="chart-1"></div>
+      </div><!--row-->
+      <div class="row" style=" height: 450px;">
+        <div class="col-lg-4 col-md-4"><img style="height: 350px;" src="img/mike.png"/></div>
+        <div class="col-lg-8 col-md-8" id="chart-2"></div>
+      </div><!--row-->
+      <div class="row" style=" height: 150px;">
+        <div class="btn-group" id="polling">
+          <button type="button" class="btn btn-info locked_active">OFF</button>
+          <button type="button" class="btn btn-default unlocked_inactive">ON</button>
+        </div>
+        <div class="alert alert-info" id="polling_status">Polling is inactive.</div>
+      </div><!--row-->
+    </div><!--Container-->  
+    <script src="/bower_components/underscore/underscore-min.js"></script>
+    <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="/bower_components/backbone/backbone-min.js"></script>
+    <script src="/js/charts.js"></script>
+    <script src="/js/client.js"></script>
+  </body>
 </html>
