@@ -147,7 +147,10 @@
       })
   }
 
-  $(document).ready(function() {   
+  $(document).ready(function() {
+    
+    Charts.initCharts(); 
+
     loadInitialContainerIds(() => {
       $('#polling button').click(function(){
         if($(this).hasClass('locked_active') || $(this).hasClass('unlocked_inactive')){
