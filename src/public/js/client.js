@@ -4,7 +4,7 @@
    * User-declared maximum number of containers which can be created
    * @type {Number}
    */
-  const MAX_CONTAINERS = 7; 
+  const MAX_CONTAINERS = 4; 
   
   /**
    * User-declared cycle speed of the polling operation
@@ -63,7 +63,7 @@
     url: '/query',
   })
   var data = new ContainerData()
-  var CreateContainerEndpoint = = Backbone.Collection.extend({
+  var CreateContainerEndpoint = Backbone.Collection.extend({
     url: '/run?script=1'
   }) 
   var createContainer = new CreateContainerEndpoint()

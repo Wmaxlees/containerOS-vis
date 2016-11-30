@@ -4,13 +4,15 @@ var Charts = {
   initCharts
 }
 
+var chart1, chart2;
+
 /**
  * Inits chart objects: 2 spline charts, 1 tree chart
  */
-
-function initCharts(){
+function initCharts() {
 	chart1 = new Highcharts.Chart({
       chart: {
+        type: 'spline',
         renderTo: 'chart-1',
         backgroundColor: {
           linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
@@ -19,9 +21,9 @@ function initCharts(){
             [1, 'rgb(153, 255, 204)']
           ]
         },
-        defaultSeriesType: 'spline',
+        // defaultSeriesType: 'spline',
         // events: {
-        // 	load: requestData
+        // 	load: 
         // }
       },
       title: {
@@ -98,9 +100,15 @@ function initCharts(){
   });
 }
 
-function updateCPU (/*arr  the array [Date.now(),x1,x2,..,xn]*/) {
-  // updates chart
-  
+function updateCPU (arr) {
+  console.log('updateCPU called with ' + arr)
+  var time = (new Date()).getTime()
+  var points = arr.slice(1)
+  points.forEach((cpuData,i) => {
+    console.log('value ' + i + ': [' + time + ', ' + cpuData + ']')
+    chart1.series[i+1].addPoint([time,cpuData],true,true)
+  })  
+  console.log(chart1.series)
 }
 
 function updateMem (arr /* whatever you need here too */) {
